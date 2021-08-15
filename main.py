@@ -19,19 +19,22 @@ f2 = open('Referer Keys.csv','w',encoding='utf-8',newline='')
 f3 = open('Expired Keys.csv','w',encoding='utf-8',newline='')
 f4 = open('Working Keys.csv','w',encoding='utf-8',newline='')
 files = {
-		'Other': csv.writer(f1),
-		'Referer': csv.writer(f2),
-		'Expired': csv.writer(f3),
-		'Working': csv.writer(f4),
-		}
+	'Other': csv.writer(f1),
+	'Referer': csv.writer(f2),
+	'Expired': csv.writer(f3),
+	'Working': csv.writer(f4),
+	}
 url = "https://github.com/search?&q=maps.googleapis.com+key%3D&s=indexed&type=Code"
-print("[=] Getting Filters")
+print("[=] Getting Filters\n")
 r = get(url,cookies=cookies)
 soup = bs(r.text,'html.parser')
 for filt in soup.findAll('a',class_='filter-item')[::-1]:
 	filt.span.extract() if filt.span else None
 	print("[+] Filter:",filt.text.strip())
-	for page in range(1,101):
+	page = 1
+	pagination = True
+	while pagination:
+	#for page in range(1,101):
 		print("\t[+] Page",page)
 		r = get('https://github.com'+filt['href']+f'&o=asc&p={page}',cookies=cookies)
 		soup = bs(r.text,'html.parser')
@@ -49,4 +52,11 @@ for filt in soup.findAll('a',class_='filter-item')[::-1]:
 				print(f'\t\t[{len(allKeys)+1}]',key,status)
 				files[status].writerow([key,'https://github.com/'+link.a['href']])
 				allKeys.append(key)
+		page+=1
+		pagination = False if soup.find('span','next_page disabled') else True
 	print()
+print("[+] Closing Files")
+for file in [f1,f2,f3,f4]:
+	file.close()
+print("\n[+] Collection Completed")
+input("[>] Enter to Exit")
