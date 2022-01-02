@@ -114,3 +114,6 @@ dmypy.json
 .pyre/
 
 cookies.json
+*.json
+*.csv
+cookies.json
